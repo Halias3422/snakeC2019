@@ -42,7 +42,6 @@ void	print_apple(WINDOW *win, t_snake *snake, t_apple *apple, int minx, int maxx
 
 	srand(time(NULL));
 	head = snake;
-//	printw("minx = %d maxx = %d miny = %d maxy = %d\n", minx, maxx, miny, maxy);
 	apple->x = minx + rand() % (maxx - minx);
 	apple->y = miny + rand() % (maxy - miny);
 	while (snake->next)
@@ -59,8 +58,25 @@ void	print_apple(WINDOW *win, t_snake *snake, t_apple *apple, int minx, int maxx
 		else
 			snake = snake->next;
 	}
-	mvwaddch(win, apple->y, apple->x, '@');
+	move(apple->y, apple->x);
+	printw("@");
+	//mvwaddch(win, apple->y, apple->x, '@');
 }
+
+void		move_snake_up(t_snake *tail)
+{
+	t_snake	*head;
+
+	head = tail->next;
+	free(tail);
+	tail = NULL;
+	head->prev = NULL;
+	tail = head;
+/*	while (head->next)
+		head = head->next;
+	head->x = head->prev->x;
+	head->y = head->prev->y - 1;
+	head = add_list_back(head);*/}
 
 int		main(void)
 {
@@ -68,6 +84,8 @@ int		main(void)
 	int		is_dead = 0;
 	t_snake *snake;
 	t_apple	*apple;
+	int		direction = 3;
+	int		input;
 
 	initscr();
 	cbreak();
@@ -81,15 +99,28 @@ int		main(void)
 	apple = (t_apple*)malloc(sizeof(t_apple));
 	create_snake(snake, (LINES / 2) / 2, (COLS / 2) / 1.5);
 	int y = 0;
-//	while (is_dead == 0)
-//	{
+	while (is_dead == 0)
+	{
 		print_snake(snake, win);
 		move(y++, 0);
-		printw("je passe\n");
 		print_apple(win, snake, apple, ((COLS / 2) / 3) + 1, (((COLS / 2) / 3) + (COLS / 1.5)) - 1, ((LINES / 2) / 2) + 1, (((LINES / 2) / 2) + LINES / 1.5) - 1);
-		wrefresh(win);
+	//refresh();
+	input = getch();
+	if (input == KEY_UP)
+		direction = 1;
+	else if (input == KEY_LEFT)
+		direction = 2;
+	else if (input == KEY_DOWN)
+		direction = 3;
+	else if (input == KEY_RIGHT)
+		direction == 4;
+	if (direction == 1)
+	{
+		move_snake_up(snake);
+	}
+	wrefresh(win);
 		usleep(300);
-//	}
+	}
 getch();
 	endwin();
 	return (0);
