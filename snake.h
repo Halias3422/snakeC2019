@@ -19,6 +19,7 @@ typedef struct s_apple
 {
 	int	x;
 	int	y;
+	int	is_eaten;
 }		t_apple;
 
 #endif
