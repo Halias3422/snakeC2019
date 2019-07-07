@@ -40,8 +40,6 @@ void	create_snake(t_snake *snake, int y, int x)
 	}
 	while (snake->prev)
 		snake = snake->prev;
-	endwin();
-	exit(0);
 }
 
 void	print_snake(t_snake *snake, WINDOW *win)
