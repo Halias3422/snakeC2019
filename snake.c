@@ -1,28 +1,14 @@
 #include "snake.h"
-/*
-t_snake	*add_list_back(t_snake *snake)
-{
-	t_snake *new;
-
-	new = NULL;
-	new = (t_snake*)malloc(sizeof(t_snake));
-	while (snake->next != NULL)
-		snake = snake->next;
-	snake->next = new;
-	new->prev = snake;
-	return (new);
-}
-*/
 
 t_snake	*add_list_back(t_snake *snake)
 {
 	t_snake	*new;
 
 	new = (t_snake*)malloc(sizeof(t_snake));
-//	new = NULL;
 	new->next = NULL;
 	new->prev = snake;
 	snake->next = new;
+	new = NULL;
 	return(snake);
 }
 
@@ -67,13 +53,14 @@ void	get_apple_position(t_snake *snake, t_apple *apple, int minx, int maxx, int 
 			apple->x = minx + rand() % (maxx - minx);
 		if (snake->y == apple->y && error++)
 			apple->y = miny + rand() % (maxy - miny);
-		if (error > 0)
-		{
-			error = 0;
-			snake = head;
-		}
-		else
+//		if (error > 0)
+//		{
+//			error = 0;
+//			snake = head;
+//		}
+//		else
 			snake = snake->next;
+		printw("je passe la\n");
 	}
 }
 
@@ -86,7 +73,6 @@ void	print_apple(t_apple *apple)
 
 int		check_if_snake_eats_apple(t_snake *snake, t_apple *apple)
 {
-	move(0, 0);
 	if (snake->prev->x + ((COLS / 2) / 3) == apple->x && snake->prev->y + ((LINES / 2) / 2) == apple->y)
 	{
 		apple->is_eaten = 1;
@@ -155,18 +141,42 @@ t_snake		*move_snake_up(t_snake *tail, WINDOW *win, t_apple *apple)
 	return (tail);
 }
 
-int		check_is_dead(t_snake *snake) { t_snake	*tail; tail = snake;
+int		check_is_dead(t_snake *snake)
+{
+       	t_snake	*tail; 
+	int	i = 0;
+        int	j = 0;	
+
+	tail = snake;
 	while (snake->next->next)
+	{
+		i++;
 		snake = snake->next;
-	while (tail->next->next->next)
-	{	
+	}
+	while (j < i)
+	{
+		j++;	
 		if (tail->x == snake->x && tail->y == snake->y)
 			return (1);
 		tail = tail->next;
 	}
-	if (snake->x >= ((COLS / 2) / 3) + COLS / 1.5 || snake->y >= ((LINES / 2) / 2) + LINES / 1.5) 
+	int	col = COLS / 1.5;
+	if (snake-> x <= 0 || snake->x >= (COLS / 1.5) - 2 || snake->y <= 0 || snake->y >= (LINES / 1.5) - 2)
 		return (1);
 	return (0);
+}
+
+void		free_struct(t_apple *apple, t_snake *snake)
+{	
+	t_snake	*head;
+
+	free(apple);
+	while (snake)
+	{
+		head = snake;
+		snake = snake->next;
+		free(head);
+	}
 }
 
 int		main(void)
@@ -178,6 +188,7 @@ int		main(void)
 	int		direction = 3;
 	int		last_direction = 3;
 	int		input;
+	int		snake_len = 2;
 
 	initscr();
 	cbreak();
@@ -191,12 +202,20 @@ int		main(void)
 	apple = (t_apple*)malloc(sizeof(t_apple));
 	create_snake(snake, (LINES / 2) / 2, (COLS / 2) / 1.5);
 	apple->is_eaten = 1;
-	//nodelay(stdscr, TRUE);
+	move(LINES / 2.5, COLS / 2 - 8);
+	printw("BEST SNAKE EVER");
+	while (getch() == ERR)
+		wait(1);
+	clear();
+	nodelay(stdscr, TRUE);
 	while (is_dead == 0)
 	{
 		print_snake(snake, win);
 		if (apple->is_eaten == 1)
+		{
+			snake_len += 1;
 			get_apple_position(snake, apple, ((COLS / 2) / 3) + 1, (((COLS / 2) / 3) + (COLS / 1.5)) - 1, ((LINES / 2) / 2) + 1, (((LINES / 2) / 2) + LINES / 1.5) - 1);
+		}
 		print_apple(apple);
 		input = getch();
 		last_direction = direction;
@@ -218,10 +237,18 @@ int		main(void)
 		else if (direction == 4)
 			snake = move_snake_left(snake, win, apple);	
 		is_dead = check_is_dead(snake);
-		timeout(150);
+		timeout(100);
 		wrefresh(win);
 	}
-	getch();
+	clear();
+	move(LINES / 2, COLS / 2 - 8);
+	printw("YOU LOST (LOOSER)\n");
+	move(LINES / 2 + 1, COLS / 2 - 6);
+	printw("Your Score: %d", snake_len - 3);
+	wait(2);
+	free_struct(apple, snake);
+	while (getch() == ERR)
+		wait(1);
 	endwin();
 	return (0);
 }
